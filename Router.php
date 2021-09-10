@@ -59,11 +59,6 @@ class Router
 
   function __call($name, $args)
   {
-    /*
-    echo "$name args : <pre>";
-    print_r($args);
-    echo "</pre>";
-    */
     list($route) = $args;
     $method = end($args);
     $middlewares = null;
@@ -125,24 +120,11 @@ class Router
       $pattern = $paramRoute["routePattern"];
       $matches = array();
       if($paramRoute["method"] == strtolower($this->request->requestMethod) && preg_match_all($pattern,$route,$matches)){
-        echo "<br> ------------------------ !  macth routes : ------------------------------- <br>";
-        echo "<br> $pattern , $route , <br>";
-        print_r($matches);
-        echo "<br>";
-        print_r($paramRoute);
-        echo "<br>";
         $explodedRoute = explode($delimiter,trim($route,$delimiter));
-        /*foreach($paramRoute["routeChunks"] as $index => $routeChunk){
-          echo "<br>". $routeChunk["isParam"]  ." - " . $explodedRoute[$index]. " - ". $routeChunk["raw"] . "<br>";
-          if($routeChunk["isParam"] == false && $routeChunk["raw"] != $explodedRoute[$index]) return false;
-        }*/
         foreach( $paramRoute["rawParams"] as $param){
           $this->request->{trim($param["rawParam"],":")} = $explodedRoute[$param["paramIndex"]];
         }
         $this->currentRequestUri = $paramRoute["fullRoute"];
-        echo "<br> <pre>";
-        print_r($this->request);
-        echo "<pre> <br>";
         return true;
       }
     }
@@ -183,41 +165,17 @@ class Router
     // get current middleware 
     $currentMiddleware = $middlewares[$index];
     $nextIndex = $index + 1;
-    /*
-    $nextMiddleware = $this->resolve;
-    if(!empty($middlewares[$nextIndex])){
-      $nextMiddleware = $middlewares[$nextIndex];
-    }
-    */
     $next = function () use ($nextIndex){$this->nextMiddleware($nextIndex);};
     $currentMiddleware($this->request,$next);
   }  
   function __destruct()
   {
-    /**/
-    echo " router : <br>";
-    echo "<pre> <h1>";
-    var_dump($this);
-    echo "</h1></pre>";
-    echo " Params : <br>";
-    echo "<pre> <h1>";
-    var_dump($this->paramRoutes);
-    echo "</h1></pre>";
-    echo "<br>";
     $pattern = $this->paramRoutes[0]["routePattern"];
-    echo "pattern |   $pattern   | test :";
-    var_dump(preg_match_all($pattern,$this->formatRoute("/oppp/lol/")));
-    echo "<br>";
-    echo "Formated Route" . $this->formatRoute($this->currentRequestUri);
-    echo "<br>";
-    echo "Incoming Route" . $this->currentRequestUri . "<br>";
-    // ----------------------------------------------------------
     if(!$this->isRouteExist($this->currentRequestUri)){
       if(!$this->matchRouteParam($this->currentRequestUri)){
         return $this->defaultRequestHandler();
       }
-    }
-    echo "<br> current route *{$this->currentRequestUri}*  <br>";
+    }    
     $this->nextMiddleware(0);
   }
 }
